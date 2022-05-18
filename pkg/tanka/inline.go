@@ -107,10 +107,7 @@ func (i *InlineLoader) List(path string, opts LoaderOpts) ([]*v1alpha1.Environme
 }
 
 func (i *InlineLoader) Eval(path string, opts LoaderOpts) (interface{}, error) {
-	// Can't provide env as extVar, as we need to evaluate Jsonnet first to know it
-	opts.ExtCode.Set(environmentExtCode, `error "Using tk.env and std.extVar('tanka.dev/environment') is only supported for static environments. Directly access this data using standard Jsonnet instead."`)
-
-	raw, err := evalJsonnet(path, opts.JsonnetOpts)
+	raw, err := evalDetect(path, opts)
 	if err != nil {
 		return nil, err
 	}

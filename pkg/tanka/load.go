@@ -46,7 +46,7 @@ func LoadEnvironment(path string, opts Opts) (*v1alpha1.Environment, error) {
 		return nil, err
 	}
 
-	env, err := loader.Load(path, LoaderOpts{opts.JsonnetOpts, opts.Name})
+	env, err := loader.Load(path, LoaderOpts{opts.JsonnetOpts, opts.Nix, opts.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func Peek(path string, opts Opts) (*v1alpha1.Environment, error) {
 		return nil, err
 	}
 
-	return loader.Peek(path, LoaderOpts{opts.JsonnetOpts, opts.Name})
+	return loader.Peek(path, LoaderOpts{opts.JsonnetOpts, opts.Nix, opts.Name})
 }
 
 // List finds metadata of all environments at path that could possibly be
@@ -87,7 +87,7 @@ func List(path string, opts Opts) ([]*v1alpha1.Environment, error) {
 		return nil, err
 	}
 
-	return loader.List(path, LoaderOpts{opts.JsonnetOpts, opts.Name})
+	return loader.List(path, LoaderOpts{opts.JsonnetOpts, opts.Nix, opts.Name})
 }
 
 // Eval returns the raw evaluated Jsonnet
@@ -97,7 +97,7 @@ func Eval(path string, opts Opts) (interface{}, error) {
 		return nil, err
 	}
 
-	return loader.Eval(path, LoaderOpts{opts.JsonnetOpts, opts.Name})
+	return loader.Eval(path, LoaderOpts{opts.JsonnetOpts, opts.Nix, opts.Name})
 }
 
 // DetectLoader detects whether the environment is inline or static and picks
@@ -137,6 +137,7 @@ type Loader interface {
 
 type LoaderOpts struct {
 	JsonnetOpts
+	Nix  NixOpts
 	Name string
 }
 

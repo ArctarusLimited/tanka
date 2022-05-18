@@ -36,8 +36,14 @@ func FindRoot(path string) (dir string, err error) {
 		stop = filepath.VolumeName(start) + "\\"
 	}
 
-	// try tkrc.yaml first
-	root, err := FindParentFile("tkrc.yaml", start, stop)
+	// try flake.nix first
+	root, err := FindParentFile("flake.nix", start, stop)
+	if err == nil {
+		return root, nil
+	}
+
+	// then, try tkrc.yaml
+	root, err = FindParentFile("tkrc.yaml", start, stop)
 	if err == nil {
 		return root, nil
 	}
@@ -61,12 +67,18 @@ func FindBase(path string, root string) (string, error) {
 		return "", err
 	}
 
+	// First, check for a flake.nix (for Nix support)
+	base, err := FindParentFile("flake.nix", dir, root)
+	if err == nil {
+		return base, nil
+	}
+
 	filename, err := Filename(path)
 	if err != nil {
 		return "", err
 	}
 
-	base, err := FindParentFile(filename, dir, root)
+	base, err = FindParentFile(filename, dir, root)
 
 	if _, ok := err.(ErrorFileNotFound); ok {
 		return "", ErrorNoBase{filename: filename}

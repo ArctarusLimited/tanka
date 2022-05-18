@@ -10,14 +10,17 @@ import (
 	"github.com/Masterminds/semver"
 
 	"github.com/grafana/tanka/pkg/jsonnet"
+	"github.com/grafana/tanka/pkg/nix"
 	"github.com/grafana/tanka/pkg/process"
 )
 
 type JsonnetOpts = jsonnet.Opts
+type NixOpts = nix.Opts
 
 // Opts specify general, optional properties that apply to all actions
 type Opts struct {
 	JsonnetOpts
+	Nix NixOpts
 
 	// Filters are used to optionally select a subset of the resources
 	Filters process.Matchers

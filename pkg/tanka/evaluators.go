@@ -2,16 +2,34 @@ package tanka
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
 
 	"github.com/grafana/tanka/pkg/jsonnet"
 	"github.com/grafana/tanka/pkg/jsonnet/jpath"
+	"github.com/grafana/tanka/pkg/nix"
 )
+
+// EvalCommon detects the evaluation type based on the contents of the directory
+func evalDetect(path string, opts LoaderOpts) (raw string, err error) {
+	_, err = os.Stat(filepath.Join(path, "flake.nix"))
+	if os.IsNotExist(err) {
+		return evalJsonnet(path, opts.JsonnetOpts)
+	} else if err != nil {
+		return "", err
+	}
+
+	return evalNix(path, "kube.tanka", opts.Nix)
+}
 
 // EvalJsonnet evaluates the jsonnet environment at the given file system path
 func evalJsonnet(path string, opts jsonnet.Opts) (raw string, err error) {
+	// Can't provide env as extVar, as we need to evaluate Jsonnet first to know it
+	opts.ExtCode.Set(environmentExtCode, `error "Using tk.env and std.extVar('tanka.dev/environment') is only supported for static environments. Directly access this data using standard Jsonnet instead."`)
+
 	entrypoint, err := jpath.Entrypoint(path)
 	if err != nil {
 		return "", err
@@ -49,6 +67,11 @@ function(%s)
 		return "", errors.Wrap(err, "evaluating jsonnet")
 	}
 	return raw, nil
+}
+
+// EvalNix evaluates the Nix flake at the given file system path
+func evalNix(path string, expr string, opts nix.Opts) (raw string, err error) {
+	return nix.EvalFlake(path, expr, opts)
 }
 
 const PatternEvalScript = "main.%s"

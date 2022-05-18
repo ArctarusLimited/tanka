@@ -57,7 +57,7 @@ func (s *StaticLoader) Eval(path string, opts LoaderOpts) (interface{}, error) {
 	}
 	opts.ExtCode.Set(environmentExtCode, envCode)
 
-	raw, err := evalJsonnet(path, opts.JsonnetOpts)
+	raw, err := evalDetect(path, opts)
 	if err != nil {
 		return nil, err
 	}
